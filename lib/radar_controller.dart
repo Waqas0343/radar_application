@@ -8,7 +8,8 @@ class RadarController extends GetxController {
   final TextEditingController locationController = TextEditingController();
   final statusMessage = "Type a location to search.".obs;
   final locations = <Map<String, String>>[].obs;
-  final radarApiKey = "YOUR_RADAR_API_KEY";
+  final radarApiKey = "prj_live_sk_01e3698647ad49d849e3562f4a6280de1161c055";
+  final isLoading = false.obs;
 
   @override
   void onInit() {
@@ -27,15 +28,17 @@ class RadarController extends GetxController {
 
   Future<List<Map<String, String>>> searchLocations(String query) async {
     try {
-      final url =
-          "https://api.radar.io/v1/search/autocomplete?query=$query&near=40.7128,-74.0060";
+      isLoading.value = true;
+      final url = "https://api.radar.io/v1/search/autocomplete?query=$query&near=40.7128,-74.0060";
       final response = await http.get(Uri.parse(url), headers: {
         "Authorization": radarApiKey,
       });
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
+        print("Api Date : $data");
         final addresses = data["addresses"] as List<dynamic>;
+        isLoading.value = false;
         return addresses
             .map((address) => {
           "name": address["name"]?.toString() ?? "",
@@ -43,10 +46,12 @@ class RadarController extends GetxController {
         })
             .toList();
       } else {
+        isLoading.value = false;
         return [];
       }
     } catch (e) {
       print("Error fetching locations: $e");
+      isLoading.value = false;
       return [];
     }
   }

@@ -9,22 +9,46 @@ class RadarLocationSearchPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final RadarController controller = Get.put(RadarController());
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Radar Location Search"),
+        title:  Text("Radar Location Search", style: Get.textTheme.titleSmall?.copyWith(
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+            fontSize: 16,
+        ),),
+        backgroundColor: Colors.red,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             TypeAheadFormField(
+              direction: AxisDirection.down,
+              autovalidateMode: AutovalidateMode.onUserInteraction,
               textFieldConfiguration: TextFieldConfiguration(
+                autofocus: false,
+                enabled: true,
+                keyboardType: TextInputType.text,
                 controller: controller.locationController,
-                decoration: const InputDecoration(
-                  labelText: "Search Location",
-                  border: OutlineInputBorder(),
-                  suffixIcon: Icon(Icons.search),
+                decoration: InputDecoration(
+                  labelText: "Location",
+                  labelStyle: const TextStyle(color: Colors.red),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: const BorderSide(
+                      color: Colors.red,
+                      width: 2,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: Colors.blue.shade500),
+                  ),
+                  suffixIcon: controller.isLoading.value
+                      ? const CircularProgressIndicator(strokeWidth: 2, color: Colors.blue)
+                      : const Icon(Icons.search, color: Colors.red),
                 ),
               ),
               suggestionsCallback: (pattern) async {
@@ -32,8 +56,18 @@ class RadarLocationSearchPage extends StatelessWidget {
               },
               itemBuilder: (context, Map<String, String> suggestion) {
                 return ListTile(
-                  title: Text(suggestion["name"] ?? ""),
-                  subtitle: Text(suggestion["formattedAddress"] ?? ""),
+                  leading: Text(
+                    suggestion["countryFlag"] ?? "🇫🇮",
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  title: Text(
+                    suggestion["name"] ?? "",
+                    style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.black, fontSize: 16),
+                  ),
+                  subtitle: Text(
+                    suggestion["formattedAddress"] ?? "",
+                    style: const TextStyle(color: Colors.grey),
+                  ),
                 );
               },
               onSuggestionSelected: (Map<String, String> suggestion) {
@@ -42,7 +76,10 @@ class RadarLocationSearchPage extends StatelessWidget {
               },
               noItemsFoundBuilder: (context) => const Padding(
                 padding: EdgeInsets.all(16.0),
-                child: Text("No locations found."),
+                child: Text(
+                  "No locations found.",
+                  style: TextStyle(fontSize: 16, fontStyle: FontStyle.italic, color: Colors.grey),
+                ),
               ),
             ),
             const SizedBox(height: 20),
